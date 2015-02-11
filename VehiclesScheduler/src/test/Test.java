@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import crawler.implementation.BtBusStationCrawler;
 import models.IntercityBus;
 import models.Taxi;
 import models.Train;
@@ -58,7 +59,7 @@ public class Test {
 		// TODO Auto-generated method stub
 		// TaxiCrawler crawler = new TaxiCrawler();
 		// printTaxiList(crawler.getAll());
-		//BtBusStationCrawler btCrawler = new BtBusStationCrawler();
+		BtBusStationCrawler btCrawler = new BtBusStationCrawler();
 		//printIntercityBusList(btCrawler.getAll());
 		//OhBusStationCrawler ohCrawler = new OhBusStationCrawler();
 		//printIntercityBusList(ohCrawler.getAll());
