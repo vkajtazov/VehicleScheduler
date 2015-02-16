@@ -1,0 +1,357 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="ctl00_Head1"><link rel="stylesheet" type="text/css" href="/DXR.axd?r=3_1,3_0,2_1,2_0" />
+<title>
+	Министерство за транспорт и врски
+</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="Scripts/jquery-1.4.4.min.js" type="text/javascript"></script>
+    <script src="Scripts/jquery.blockUI.js" type="text/javascript"></script>
+    <script src="Scripts/jquery.jqURL.js" type="text/javascript"></script>
+    <script src="Scripts/JScript.js" type="text/javascript"></script>
+    <script src="Scripts/helpers/HtmlHelper.js" type="text/javascript"></script>
+    <script src="Scripts/jquery.json-2.2.min.js" type="text/javascript"></script>
+    <script src="Scripts/Apliciranje/NaselenoMesto.js" type="text/javascript"></script>
+    <script src="Scripts/jquery-ui-1.8.9.custom/js/jquery-ui-1.8.9.custom.min.js" type="text/javascript"></script>
+    <script src="Scripts/jquery.cyrillic.js" type="text/javascript"></script>
+    <link href="Scripts/jquery-ui-1.8.9.custom/css/ui-lightness/jquery-ui-1.8.9.custom.own.css"
+        rel="stylesheet" type="text/css" />
+    <script type="text/javascript">
+        var naseleniMesta = new NaseleniMesta();
+        var naseleniMestaKrajnaTocka = new NaseleniMesta();
+        var data;
+        function setAutoComplete() {
+            getPocetnaTockaAutoComplete();
+            $(".KrajnaTocka").keyup(function (event) {
+                if (event.keyCode == '13') {
+                    $(".KrajnaTocka").blur();
+                    $("#btnBaraj").click();
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+        };
+
+        function getPocetnaTockaAutoComplete() {
+            $.ajax({
+                type: "POST",
+                url: "Search.aspx/getNaseleniMestaPocetnaTockaVoMeguopshtinski",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: getNaseleniMestaPocetnaTocka
+            });
+        };
+
+        function getNaseleniMestaPocetnaTocka(msg) {
+            if (msg.hasOwnProperty("d")) { msg = msg.d; }
+            naseleniMesta = new NaseleniMesta();
+            data = msg;
+            if (msg != null) {
+                $.each(data, function (index, itemData) {
+                    var nasMesto = new NaselenoMesto(itemData.Id, itemData.Ime, itemData.IsOpstina);
+                    naseleniMesta.Add(nasMesto);
+                });
+                makeElementAutocomplete($(".PocetnaTocka"));
+                $("input.point_input").cyrillic();
+                $(".PocetnaTocka").live("blur", OnPocetnaTocka_Blur);
+                $(".KrajnaTocka").live("blur", OnKrajnaTocka_Blur);
+            }
+        };
+
+        function makeElementAutocomplete(selector) {
+            $(selector).autocomplete({
+                source: function (request, response) {
+
+                    var term = $.trim(request.term);
+                    if (term == "") { return; }
+
+                    var data = new Array();
+                    for (var i = 0; i < naseleniMesta.items.length; i++) {
+                        var naselenoMesto = naseleniMesta.items[i];
+                        if (naselenoMesto.Ime.toLowerCase().indexOf(term.toLowerCase()) === 0) {
+                            data.push(naselenoMesto.Ime);
+                        }
+                    }
+                    response(data);
+                }
+                , minLength: 1
+                , select: function (event, ui) {
+                }
+                , open: function (event, ui) {
+                }
+            }).data("autocomplete")._renderItem = _renderItemHandler;
+        };
+
+        //ajax povik za NaseleniMesta za krajnata tocka
+        function getKrajnaTockaAutoComplete(nasMestoId) {
+            $.ajax({
+                type: "POST",
+                url: "Search.aspx/getNaseleniMestaDestinacijaVoMeguopshtinski",
+                data: "{ naselenoMestoId: '" + nasMestoId + "'}",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: getNaseleniMestaVoOpshtinski
+            });
+        };
+
+        //ja polni naseleniMestaKrajnaTocka(za autocomplete)
+        function getNaseleniMestaVoOpshtinski(msg) {
+
+            if (msg.hasOwnProperty("d")) { msg = msg.d; }
+            naseleniMestaKrajnaTocka = new NaseleniMesta();
+            data = msg;
+            if (msg != null) {
+                $.each(data, function (index, itemData) {
+                    var nasMesto = new NaselenoMesto(itemData.Id, itemData.Ime, itemData.IsOpstina);
+                    naseleniMestaKrajnaTocka.Add(nasMesto);
+                });
+                makeKrajnaTockaAutocomplete($(".KrajnaTocka"));
+            }
+        };
+
+        function makeKrajnaTockaAutocomplete(selector) {
+            $(selector).autocomplete({
+                source: function (request, response) {
+
+                    var term = $.trim(request.term);
+                    //if (term == "") { return; }
+
+                    var data = new Array();
+                    for (var i = 0; i < naseleniMestaKrajnaTocka.items.length; i++) {
+                        var naselenoMestoKrajna = naseleniMestaKrajnaTocka.items[i];
+                        if (naselenoMestoKrajna.Ime.toLowerCase().indexOf(term.toLowerCase()) === 0) {
+                            data.push(naselenoMestoKrajna.Ime);
+                        }
+                    }
+                    response(data);
+                }
+                , minLength: 0
+                , select: function (event, ui) {
+                }
+                , open: function (event, ui) {
+                }
+            }).data("autocomplete")._renderItem = _renderItemHandler;
+        };
+
+        //Override JQUERY UI AUTOCOMPLETE _renderItem method
+        var _renderItemHandler = function (ul, item) {
+
+            var term = item.label;
+            return $("<li></li>").data("item.autocomplete", item).append("<a>" + term + "</a>").appendTo(ul);
+        };
+
+        var OnPocetnaTocka_Blur = function (e) {
+            var value = $(this).val();
+            var naselenoMesto = naseleniMesta.FindByIme(value);
+            if (naselenoMesto != null) {
+                $(this).attr("rel", naselenoMesto.Id);
+                getKrajnaTockaAutoComplete(naselenoMesto.Id);
+            }
+            else {
+                $(this).attr("rel", "");
+                $(this).val("");
+                //$(this).focus();
+            }
+        };
+
+        var OnKrajnaTocka_Blur = function (e) {
+
+            var value = $(this).val();
+            var naselenoMesto = naseleniMestaKrajnaTocka.FindByIme(value);
+            if (naselenoMesto != null) {
+                $(this).attr("rel", naselenoMesto.Id);
+            }
+            else {
+                $(this).attr("rel", "");
+                $(this).val("");
+            }
+        };
+
+        function baraj() {
+            var pocetna = $(".PocetnaTocka").attr('rel');
+            var krajna = $(".KrajnaTocka").attr('rel');
+            var undifined;
+            if (pocetna == undifined || krajna == undifined || krajna == "" || pocetna == "") {
+                alert("Ве молиме потполнете ги сите полиња пред да се изврши пребарувањe.");
+                if (pocetna == undifined || pocetna == "")
+                    $(".PocetnaTocka").focus();
+                else if (krajna == undifined || krajna == "")
+                    $(".KrajnaTocka").focus();
+                return;
+            }
+            grdSearch.PerformCallback(pocetna + "|" + krajna);
+            grdSearch.pageIndex = 0;
+            $("#divGV").css('visibility', 'visible');
+        };
+
+
+        $(function () {
+            setAutoComplete();
+        });
+    </script>
+
+
+<link href="App_Themes/Default/login.css" type="text/css" rel="stylesheet" /><link href="App_Themes/Default/reset.css" type="text/css" rel="stylesheet" /><link href="App_Themes/Default/style.css" type="text/css" rel="stylesheet" /></head>
+<body>
+    <form name="aspnetForm" method="post" action="search.aspx" id="aspnetForm">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKMjEzMTM4NTU4OQ9kFgJmD2QWAgIDD2QWAgIBD2QWAgIFDzwrABYCAA8WAh4OXyFVc2VWaWV3U3RhdGVnZAYPZBAWBmYCAQICAgMCBAIFFgY8KwALAQAWAh4PQ29sVmlzaWJsZUluZGV4ZjwrAAsBABYCHwECATwrAAsBABYCHwECAjwrAAsBABYCHwECAzwrAAsBABYCHwECBDwrAAsBABYCHwECBQ8WBgIBAgECAQIBAgECARYBBZkBRGV2RXhwcmVzcy5XZWIuQVNQeEdyaWRWaWV3LkdyaWRWaWV3RGF0YVRleHRDb2x1bW4sIERldkV4cHJlc3MuV2ViLkFTUHhHcmlkVmlldy52MTAuMSwgVmVyc2lvbj0xMC4xLjQuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iODhkMTc1NGQ3MDBlNDlhZBgBBR5fX0NvbnRyb2xzUmVxdWlyZVBvc3RCYWNrS2V5X18WAQUlY3RsMDAkcmVnTWFpbkNvbnRlbnQkZ3JkU2VhcmNoUmVzdWx0cxV0p3EnfBz08fAuGxAqq448l7Hv" />
+
+<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="BBBC20B8" />
+<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEWBAK/wus+AuqA5aYMAq6KhIICArnR184FIWdX4PoZExXTf73vmz2fbor7X04=" />
+    
+    <div id="header-top" class="alpha60">
+    </div>
+    <div id="header" class="appWidth">
+        <img src="images/mainImage.jpg" width="237" height="200" alt="Liniski prevoz" />
+        <div id="appHeading">
+            <img src="images/logo_boja.gif" width="90" alt="" />
+            <h2>
+                Министерство за транспорт и врски</h2>
+            <h1>
+                електронска регистрација на патни линии</h1>
+        </div>
+        <div class="cleanRuler">
+        </div>
+    </div>
+    <div id="container" class="appWidth">
+        
+
+    <div style="padding: 10px">
+        <table width="100%">
+            <tr>
+                <td style="font-size: 13px; padding-bottom: 3px">Населено место од:
+                </td>
+                <td style="font-size: 13px; padding-bottom: 3px">Населено место до:
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 30px; width: 30%">
+                    <input name="ctl00$regMainContent$PocetnaTocka" type="text" id="ctl00_regMainContent_PocetnaTocka" class="PocetnaTocka point_input ui-autocomplete-input searchField" />
+                </td>
+                <td style="padding-right: 30px; width: 30%">
+                    <input name="ctl00$regMainContent$KrajnaTocka" type="text" id="ctl00_regMainContent_KrajnaTocka" class="KrajnaTocka point_input ui-autocomplete- searchField" />
+                </td>
+                <td width="40%">
+                    <input type="button" id="btnBaraj" name="btnBaraj" value="Барај" onclick="baraj()"
+                        class="lsb" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="padding-top: 15px">
+                    <span style="font-size: 13px; line-height: 1.5; display: block">Резултати од пребарувањето:</span>
+                    <script id="dxis_620101058" src="/DXR.axd?r=1_23,1_29,1_41,3_6,2_21,2_28" type="text/javascript"></script>
+<script id="dxss_697551599" type="text/javascript">
+<!--
+window.__aspxServerFormID = 'aspnetForm';
+window.__aspxEmptyImageUrl = '/DXR.axd?r=1_3';
+//-->
+</script>
+
+<table class="dxgvControl" cellspacing="0" cellpadding="0" id="ctl00_regMainContent_grdSearchResults" border="0" width="100%" style="border-collapse:separate;">
+	<tr>
+		<td><table id="ctl00_regMainContent_grdSearchResults_DXMainTable" class="dxgvTable" cellspacing="0" cellpadding="0" border="0" width="100%" style="empty-cells:show;">
+			<tr id="ctl00_regMainContent_grdSearchResults_DXHeadersRow">
+				<td id="ctl00_regMainContent_grdSearchResults_DX-DT-col0" class="dxgvHeader" onmousedown="aspxGVHeaderMouseDown('ctl00_regMainContent_grdSearchResults', this, event);" width="1%" style="text-align:Center;border-left-width:0px;border-top-width:0px;"><table cellspacing="0" cellpadding="0" border="0" width="100%">
+					<tr>
+						<td style="text-align:Center;">#</td>
+					</tr>
+				</table></td><td id="ctl00_regMainContent_grdSearchResults_DX-GSDT-col1" class="dxgvHeader" onmousedown="aspxGVHeaderMouseDown('ctl00_regMainContent_grdSearchResults', this, event);" width="1%" style="border-left-width:0px;border-top-width:0px;"><table cellspacing="0" cellpadding="0" border="0" width="100%">
+					<tr>
+						<td>Поаѓа во</td>
+					</tr>
+				</table></td><td id="ctl00_regMainContent_grdSearchResults_DX-GSDT-col2" class="dxgvHeader" onmousedown="aspxGVHeaderMouseDown('ctl00_regMainContent_grdSearchResults', this, event);" style="border-left-width:0px;border-top-width:0px;"><table cellspacing="0" cellpadding="0" border="0" width="100%">
+					<tr>
+						<td>Превозник</td>
+					</tr>
+				</table></td><td id="ctl00_regMainContent_grdSearchResults_DX-GSDT-col3" class="dxgvHeader" onmousedown="aspxGVHeaderMouseDown('ctl00_regMainContent_grdSearchResults', this, event);" style="border-left-width:0px;border-top-width:0px;"><table cellspacing="0" cellpadding="0" border="0" width="100%">
+					<tr>
+						<td>Линија</td>
+					</tr>
+				</table></td><td id="ctl00_regMainContent_grdSearchResults_DX-GSDT-col4" class="dxgvHeader" onmousedown="aspxGVHeaderMouseDown('ctl00_regMainContent_grdSearchResults', this, event);" style="border-left-width:0px;border-top-width:0px;"><table cellspacing="0" cellpadding="0" border="0" width="100%">
+					<tr>
+						<td>Режим</td>
+					</tr>
+				</table></td><td id="ctl00_regMainContent_grdSearchResults_DX-DT-col5" class="dxgvHeader" onmousedown="aspxGVHeaderMouseDown('ctl00_regMainContent_grdSearchResults', this, event);" width="1%" style="border-left-width:0px;border-top-width:0px;border-right-width:0px;"><table cellspacing="0" cellpadding="0" border="0" width="100%">
+					<tr>
+						<td>Во период</td>
+					</tr>
+				</table></td>
+			</tr><tr class="dxgvEmptyDataRow">
+				<td class="dxgv" colspan="6" style="border-bottom-width:0px;"><div>
+					Нема пронајдени линии
+				</div></td>
+			</tr>
+		</table><img id="ctl00_regMainContent_grdSearchResults_IADD" class="dxGridView_gvDragAndDropArrowDown" src="/DXR.axd?r=1_3" alt="|" title="" border="0" style="position:absolute;visibility:hidden;top:-100px;" /><img id="ctl00_regMainContent_grdSearchResults_IADU" class="dxGridView_gvDragAndDropArrowUp" src="/DXR.axd?r=1_3" alt="|" title="" border="0" style="position:absolute;visibility:hidden;top:-100px;" /><img id="ctl00_regMainContent_grdSearchResults_IDHF" class="dxGridView_gvDragAndDropHideColumn" src="/DXR.axd?r=1_3" alt="Hide" title="" border="0" style="position:absolute;visibility:hidden;top:-100px;" /><table id="ctl00_regMainContent_grdSearchResults_LP" class="dxgvLoadingPanel" cellspacing="0" cellpadding="0" border="0" style="left:0px;top:0px;z-index:30000;display:none;">
+			<tr>
+				<td class="dx"><img src="/DXR.axd?r=3_3" alt="" align="middle" border="0" /></td><td class="dx" style="padding-left:0px;">Се вчитува&hellip;</td>
+			</tr>
+		</table><div id="ctl00_regMainContent_grdSearchResults_LD" class="dxgvLoadingDiv" style="display:none;z-index:29999;position:absolute;">
+
+		</div><input type="hidden" name="ctl00$regMainContent$grdSearchResults$DXSelInput" id="ctl00_regMainContent_grdSearchResults_DXSelInput" /><table id="ctl00_regMainContent_grdSearchResults_DXStyleTable" border="0" style="display:none;">
+			<tr>
+				<td></td>
+			</tr><tr class="dxgvEditingErrorRow">
+				<td class="dxgv" colspan="6" style="border-right-width:0px;"></td>
+			</tr><tr class="dxgvSelectedRow">
+				<td></td>
+			</tr><tr class="dxgvFocusedRow">
+				<td></td>
+			</tr><tr class="dxgvFocusedGroupRow">
+				<td></td>
+			</tr>
+		</table><input type="hidden" name="ctl00$regMainContent$grdSearchResults$CallbackState" id="ctl00_regMainContent_grdSearchResults_CallbackState" value="/wEWBB4ERGF0YQUsQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBSEFBY0EeBVN0YXRlBVRCd1lIQUFJQkJ3RUNBUWNDQWdFSEF3SUJCd1FDQVFjRkFnRUhBQWNBQndBSEFBSUFCdi8vQ1FJQUNRSUFBZ0FEQndRQ0FBY0FBZ0VIQUFJQkJ3QT0=" /></td>
+	</tr>
+</table><script id="dxss_1104595682" type="text/javascript">
+<!--
+
+var dxo = new ASPxClientGridView('ctl00_regMainContent_grdSearchResults');
+window['grdSearch'] = dxo;
+dxo.callBack = function(arg) { WebForm_DoCallback('ctl00$regMainContent$grdSearchResults',arg,aspxCallback,'ctl00_regMainContent_grdSearchResults',aspxCallbackError,true); };
+dxo.uniqueID = 'ctl00$regMainContent$grdSearchResults';
+dxo.renderIFrameForPopupElements = true;
+dxo.callBacksEnabled=true;
+dxo.pageRowCount=0;
+dxo.pageRowSize=10;
+dxo.pageIndex=0;
+dxo.pageCount=0;
+dxo.selectedWithoutPageRowCount=0;
+dxo.visibleStartIndex=0;
+dxo.focusedRowIndex=-1;
+dxo.allowFocusedRow=false;
+dxo.allowMultiSelection=false;
+dxo.isColumnsResizable=false;
+dxo.isVerticalScrolling=false;
+dxo.isHorizontalScrolling=false;
+dxo.isMainControlResizable=false;
+dxo.callbackOnFocusedRowChanged=false;
+dxo.callbackOnSelectionChanged=false;
+dxo.autoFilterDelay='1200';
+dxo.ClearColumns();
+dxo.CreateColumn('rowNo',0,'',1,'');
+dxo.CreateColumn('Period',1,'VremeNaPoaganje',1,'');
+dxo.CreateColumn('',2,'FirmaIme',1,'');
+dxo.CreateColumn('',3,'VozenRedIme',1,'');
+dxo.CreateColumn('',4,'RezimOpis',1,'');
+dxo.CreateColumn('Period',5,'',1,'');
+dxo.editState=0;
+dxo.InlineInitialize();
+
+//-->
+</script>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    </div>
+    <div class="footerRuler appWidth">
+    </div>
+    <div id="footer" class="alpha60 appWidth">
+        © 2011 Министерство за транспорт и врски.</div>
+    </form>
+</body>
+</html>
