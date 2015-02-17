@@ -14,11 +14,13 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import com.gargoylesoftware.htmlunit.AjaxController;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebWindow;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
@@ -29,17 +31,25 @@ import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
 import com.gargoylesoftware.htmlunit.javascript.background.JavaScriptJobManager;
+import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLButtonElement;
 
 public class BusStationCrawler {
 
 	public void sendPOST() throws Exception {
 
-		final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
+		final WebClient webClient = new WebClient(BrowserVersion.CHROME);
 		webClient.getOptions().setJavaScriptEnabled(true);
-		webClient.getOptions().setCssEnabled(false); // I think this speeds the thing up
+		webClient.getOptions().setCssEnabled(false); // I think this speeds the
+														// thing up
 		webClient.getOptions().setRedirectEnabled(true);
-		webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+		webClient.setAjaxController(new AjaxController() {
+			@Override
+			public boolean processSynchron(HtmlPage page, WebRequest request,
+					boolean async) {
+				return true;
+			}
+		});
 		webClient.getCookieManager().setCookiesEnabled(true);
 
 		HtmlPage page = null;
@@ -61,15 +71,21 @@ public class BusStationCrawler {
 			e.printStackTrace();
 		}
 
-		HtmlTextInput from = page.getElementByName("ctl00$regMainContent$PocetnaTocka");
+		HtmlTextInput from = page
+				.getElementByName("ctl00$regMainContent$PocetnaTocka");
+		from.click();
 		from.setValueAttribute("скопје");
-		
-		HtmlTextInput to = page.getElementByName("ctl00$regMainContent$KrajnaTocka");
+
+		HtmlTextInput to = page
+				.getElementByName("ctl00$regMainContent$KrajnaTocka");
+		to.click();
 		to.setValueAttribute("гевгелија");
 		
 		HtmlButtonInput button = page.getElementByName("btnBaraj");
-		
+
 		HtmlPage page2 = button.click();
+
+		webClient.waitForBackgroundJavaScript(10*1000);
 		
 		String content = page2.asText();
 		System.out.println(content);
