@@ -1,38 +1,17 @@
 package crawler.implementation;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import com.gargoylesoftware.htmlunit.AjaxController;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
-import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.WebWindow;
-import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlButtonInput;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
-import com.gargoylesoftware.htmlunit.javascript.background.JavaScriptJobManager;
-import com.gargoylesoftware.htmlunit.javascript.host.Event;
-import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLButtonElement;
 
 public class BusStationCrawler {
 
@@ -79,7 +58,7 @@ public class BusStationCrawler {
 		HtmlTextInput to = page
 				.getElementByName("ctl00$regMainContent$KrajnaTocka");
 		to.click();
-		to.setValueAttribute("гевгелија");
+		to.setValueAttribute("велес");
 		
 		HtmlButtonInput button = page.getElementByName("btnBaraj");
 
@@ -87,9 +66,22 @@ public class BusStationCrawler {
 
 		webClient.waitForBackgroundJavaScript(10*1000);
 		
-		String content = page2.asText();
-		System.out.println(content);
-
+		//Iterate on pages
+		HtmlElement element = page2.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td[7]");
+		
+		int counter = 9;
+		
+		while(element!=null){
+		page2 = element.click();
+		webClient.waitForBackgroundJavaScript(10*1000);
+		System.out.println(page2.asXml());
+		//proverka dali e stignato do kraj (ja zima strelkata kako element)
+		element = page2.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td["+counter+"]/img");
+		if(element!=null)break;
+		element = page2.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td["+counter+"]");
+		counter+=2;
+		}
+		
 		webClient.closeAllWindows();
 	}
 
