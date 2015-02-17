@@ -74,7 +74,7 @@ public class BusStationCrawler {
 		while(element!=null){
 		page2 = element.click();
 		webClient.waitForBackgroundJavaScript(10*1000);
-		System.out.println(page2.asXml());
+		System.out.println(page2.asText());
 		//proverka dali e stignato do kraj (ja zima strelkata kako element)
 		element = page2.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td["+counter+"]/img");
 		if(element!=null)break;
@@ -84,11 +84,60 @@ public class BusStationCrawler {
 		
 		webClient.closeAllWindows();
 	}
+	
+	public static void getAllCities() throws IOException{
+		final WebClient webClient = new WebClient(BrowserVersion.CHROME);
+		webClient.getOptions().setJavaScriptEnabled(true);
+		webClient.getOptions().setCssEnabled(false); // I think this speeds the
+														// thing up
+		webClient.getOptions().setRedirectEnabled(true);
+		webClient.setAjaxController(new AjaxController() {
+			@Override
+			public boolean processSynchron(HtmlPage page, WebRequest request,
+					boolean async) {
+				return true;
+			}
+		});
+		webClient.getCookieManager().setCookiesEnabled(true);
+
+		HtmlPage page = null;
+		try {
+			System.out.println("Querying");
+			page = webClient.getPage("http://liniskiprevoz.gov.mk/search.aspx");
+			System.out.println("Success");
+		} catch (final FailingHttpStatusCodeException e) {
+			System.out.println("One");
+			e.printStackTrace();
+		} catch (final MalformedURLException e) {
+			System.out.println("Two");
+			e.printStackTrace();
+		} catch (final IOException e) {
+			System.out.println("Three");
+			e.printStackTrace();
+		} catch (final Exception e) {
+			System.out.println("Four");
+			e.printStackTrace();
+		}
+
+		HtmlTextInput from = page
+				.getElementByName("ctl00$regMainContent$PocetnaTocka");
+		page = from.click();
+		
+		from.type("с");
+		webClient.waitForBackgroundJavaScript(10*1000);
+		HtmlElement element = page.getFirstByXPath("/html/body/ul[1]");
+		
+		System.out.println(element.asText());
+		
+		
+		
+	}
 
 	public static void main(String[] args) {
 		BusStationCrawler test = new BusStationCrawler();
 		try {
-			test.sendPOST();
+			//test.sendPOST();
+			test.getAllCities();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
