@@ -14,25 +14,34 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.WebWindow;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlButtonInput;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
+import com.gargoylesoftware.htmlunit.javascript.background.JavaScriptJobManager;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLButtonElement;
 
 public class BusStationCrawler {
 
 	public void sendPOST() throws Exception {
 
-		final WebClient webClient = new WebClient();
+		final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
+		webClient.getOptions().setJavaScriptEnabled(true);
+		webClient.getOptions().setCssEnabled(false); // I think this speeds the thing up
+		webClient.getOptions().setRedirectEnabled(true);
 		webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+		webClient.getCookieManager().setCookiesEnabled(true);
+
 		HtmlPage page = null;
 		try {
 			System.out.println("Querying");
@@ -53,18 +62,16 @@ public class BusStationCrawler {
 		}
 
 		HtmlTextInput from = page.getElementByName("ctl00$regMainContent$PocetnaTocka");
-		from.setValueAttribute("skopje");
+		from.setValueAttribute("скопје");
 		
 		HtmlTextInput to = page.getElementByName("ctl00$regMainContent$KrajnaTocka");
-		to.setValueAttribute("gevgelija");
+		to.setValueAttribute("гевгелија");
 		
 		HtmlButtonInput button = page.getElementByName("btnBaraj");
 		
 		HtmlPage page2 = button.click();
-		webClient.waitForBackgroundJavaScript(10000);
 		
-		WebResponse response = page2.getWebResponse();
-		String content = response.getContentAsString();
+		String content = page2.asText();
 		System.out.println(content);
 
 		webClient.closeAllWindows();
