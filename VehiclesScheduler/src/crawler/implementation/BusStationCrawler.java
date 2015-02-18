@@ -2,6 +2,7 @@ package crawler.implementation;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 
 import com.gargoylesoftware.htmlunit.AjaxController;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
@@ -59,33 +60,44 @@ public class BusStationCrawler {
 				.getElementByName("ctl00$regMainContent$KrajnaTocka");
 		to.click();
 		to.setValueAttribute("велес");
-		
+
 		HtmlButtonInput button = page.getElementByName("btnBaraj");
 
 		HtmlPage page2 = button.click();
 
-		webClient.waitForBackgroundJavaScript(10*1000);
-		
-		//Iterate on pages
-		HtmlElement element = page2.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td[7]");
-		
+		webClient.waitForBackgroundJavaScript(10 * 1000);
+
+		// Iterate on pages
+		HtmlElement element = page2
+				.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td[7]");
+
 		int counter = 9;
-		
-		while(element!=null){
-		page2 = element.click();
-		webClient.waitForBackgroundJavaScript(10*1000);
-		System.out.println(page2.asText());
-		//proverka dali e stignato do kraj (ja zima strelkata kako element)
-		element = page2.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td["+counter+"]/img");
-		if(element!=null)break;
-		element = page2.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td["+counter+"]");
-		counter+=2;
+
+		while (element != null) {
+			page2 = element.click();
+			webClient.waitForBackgroundJavaScript(10 * 1000);
+			System.out.println(page2.asText());
+			// proverka dali e stignato do kraj (ja zima strelkata kako element)
+			element = page2
+					.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td["
+							+ counter + "]/img");
+			if (element != null)
+				break;
+			element = page2
+					.getFirstByXPath("/html/body/form/div[5]/div[1]/table/tbody/tr[3]/td/table/tbody/tr/td/div/table/tbody/tr/td/table/tbody/tr/td["
+							+ counter + "]");
+			counter += 2;
 		}
-		
+
 		webClient.closeAllWindows();
 	}
-	
-	public static void getAllCities() throws IOException{
+
+	public static ArrayList<String> getAllCities() throws IOException {
+		char [] alphabet = new char[] { 'а', 'б', 'в', 'г', 'д', 'ѓ', 'е',
+				'ж', 'з', 'ѕ', 'и', 'ј', 'к', 'л', 'љ', 'м', 'н', 'њ', 'о',
+				'п', 'р', 'с', 'т', 'ќ', 'у','ф','х','ц','ч','џ','ш'};
+		ArrayList<String> cities = new ArrayList<String>();
+
 		final WebClient webClient = new WebClient(BrowserVersion.CHROME);
 		webClient.getOptions().setJavaScriptEnabled(true);
 		webClient.getOptions().setCssEnabled(false); // I think this speeds the
@@ -122,21 +134,35 @@ public class BusStationCrawler {
 		HtmlTextInput from = page
 				.getElementByName("ctl00$regMainContent$PocetnaTocka");
 		page = from.click();
-		
-		from.type("с");
-		webClient.waitForBackgroundJavaScript(10*1000);
+
+		for (char alpha : alphabet) {
+			
+		from.type(alpha);
+		webClient.waitForBackgroundJavaScript(10 * 1000);
 		HtmlElement element = page.getFirstByXPath("/html/body/ul[1]");
+		from.setValueAttribute("");
+		cities.addAll(parseCityNames(element.asText()));
+		}
 		
-		System.out.println(element.asText());
-		
-		
-		
+		return cities;
+
+	}
+	
+	private  static ArrayList<String> parseCityNames (String element){
+		ArrayList<String>cities = new ArrayList<String>();
+		String[] array  = element.split("\n");
+		for (String string : array) {
+			cities.add(string);
+		}
+		return cities;
 	}
 
 	public static void main(String[] args) {
 		BusStationCrawler test = new BusStationCrawler();
+		
+		
 		try {
-			//test.sendPOST();
+			// test.sendPOST();
 			test.getAllCities();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
