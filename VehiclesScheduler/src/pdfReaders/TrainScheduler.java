@@ -35,7 +35,6 @@ public class TrainScheduler {
 	}
 
 	private static ArrayList<Train> getTrainSchedule(String string) {
-
 		String[] parseStrings = string.split(";");
 		int startRow = Integer.parseInt(parseStrings[1]);
 		int endRow = Integer.parseInt(parseStrings[2]);

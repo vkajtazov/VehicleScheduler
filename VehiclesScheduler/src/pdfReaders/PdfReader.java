@@ -13,8 +13,10 @@ public class PdfReader {
 	
 	public static String getTextFromPdf (String path){
 		Document pdf = PDF.open(path);
+		
 	    StringBuilder text = new StringBuilder(1024);
-	    pdf.pipe(new OutputTarget(text));
+	    pdf.pipe(new OutputTarget(text));	
+	    
 	    try {
 			pdf.close();
 		} catch (IOException e) {

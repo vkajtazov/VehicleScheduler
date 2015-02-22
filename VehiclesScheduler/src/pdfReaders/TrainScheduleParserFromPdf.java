@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import traslateText.Translate;
 import models.Train;
 import crawler.interfaces.BasicCrawlerInterface;
 
@@ -122,7 +123,7 @@ public class TrainScheduleParserFromPdf implements BasicCrawlerInterface<Train> 
 		Time time = Time.valueOf(splitTime[0] + ":" + splitTime[1] + ":00");
 
 		Train train = new Train();
-		train.setStartingCity(start);
+		train.setStartingCity(Translate.translateWord(start));
 		train.setStartTime(time);
 
 		return train;
@@ -154,7 +155,7 @@ public class TrainScheduleParserFromPdf implements BasicCrawlerInterface<Train> 
 	//	System.out.println(endTime.trim() + " " + splitTime.length+"   da");
 		Time time = Time.valueOf(splitTime[0] + ":" + splitTime[1] + ":00");
 
-		train.setArrivingCity(end);
+		train.setArrivingCity(Translate.translateWord(end));
 		train.setArrivingTime(time);
 
 		return train;
@@ -167,7 +168,7 @@ public class TrainScheduleParserFromPdf implements BasicCrawlerInterface<Train> 
 		String[] timeSplit = temp.split("\\.");
 
 		Time time = Time.valueOf(timeSplit[0] + ":" + timeSplit[1] + ":00");
-		train.setArrivingCity(niza[0]);
+		train.setArrivingCity(Translate.translateWord(niza[0]));
 		train.setArrivingTime(time);
 
 		return train;
