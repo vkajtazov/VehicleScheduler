@@ -1,41 +1,41 @@
 package pdfReaders;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import models.CityBus;
-import crawler.interfaces.BasicCrawlerInterface;
 
-public class PrivateBusScheduler implements BasicCrawlerInterface<CityBus>{
-	private String pathToFile;
-	private int startRow;
-	private int endRow;
+public class PrivateBusScheduler {
 
-	public PrivateBusScheduler(String pathToFile, int startRow, int endRow) {
-		super();
-		this.pathToFile = pathToFile;
-		this.startRow = startRow;
-		this.endRow = endRow;
+	private static String path = "bus schedule.txt";
+	
+	public static List<CityBus> parseAllBusses () throws IOException{
+		
+		ArrayList<CityBus> cityBusList = new ArrayList<CityBus>();
+		ArrayList<String> rows = TrainScheduler.readFromDirectoriesNames(path);
+		
+		for (String line : rows) {
+			cityBusList.addAll(parseBusSchedule(line));
+		}
+		
+		return cityBusList;
 	}
 
-	@Override
-	public List<CityBus> getAll() {
-		ArrayList<String[]> rowsSplits = parseSchedule(startRow, endRow);
+	private static List<CityBus> parseBusSchedule(String line) {
+
+		PrivateBusParser scheduler = new PrivateBusParser(line);
+		return scheduler.getAll();
+	}
+
+	public static CityBus.REGULARITY getRegularity(String regularityString) {
+		if (regularityString.equals("EveryDay"))
+			return CityBus.REGULARITY.EveryDay;
+		else if (regularityString.equals("Saturday")) {
+			return CityBus.REGULARITY.Saturday;
+		} else if (regularityString.equals("Sunday")) {
+			return CityBus.REGULARITY.Sunday;
+		}
 		return null;
 	}
-	
-	private ArrayList<String[]> parseSchedule(int start, int end) {
-		String[] rowsArray = PdfReader.getRowsStringsFromPdf(pathToFile);
-		ArrayList<String[]> result = new ArrayList<String[]>();
-
-		for (int i = start; i < end; i++) {
-			String[] tokens = rowsArray[i].split("     ");
-			result.add(tokens);
-		}
-		return result;
-	}
-	
-	
-
 }

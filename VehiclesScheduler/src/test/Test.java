@@ -9,10 +9,12 @@ import java.util.List;
 
 import crawler.implementation.BtBusStationCrawler;
 import locationReaders.LocationReader;
+import models.CityBus;
 import models.IntercityBus;
 import models.Taxi;
 import models.Train;
 import pdfReaders.PdfReader;
+import pdfReaders.PrivateBusParser;
 import pdfReaders.PrivateBusScheduler;
 import pdfReaders.TrainScheduler;
 
@@ -56,7 +58,18 @@ public class Test {
 		}
 		writer.close();
 	}
+	
+	public static void printCityBusList(List<CityBus> list)
+			throws FileNotFoundException, UnsupportedEncodingException {
+		PrintWriter writer = new PrintWriter("cityBus.txt", "UTF-8");
 
+		for (CityBus bus : list) {
+			writer.print(bus.toString());
+			writer.println("------------------------------------------");
+		}
+		writer.close();
+	}
+	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		// TaxiCrawler crawler = new TaxiCrawler();
@@ -65,23 +78,26 @@ public class Test {
 		// printIntercityBusList(btCrawler.getAll());
 		// OhBusStationCrawler ohCrawler = new OhBusStationCrawler();
 		// printIntercityBusList(ohCrawler.getAll());
-		//ArrayList<Train>trainList = TrainScheduler.parseAllTrainPdfs();
-		//printTrainList(trainList);
+		// ArrayList<Train>trainList = TrainScheduler.parseAllTrainPdfs();
+		// printTrainList(trainList);
 
-		LocationReader.getCityLocation("Гевгелија");
-		
+		// LocationReader.getCityLocation("Гевгелија");
+
 		// String[] list =
 		// PdfReader.getRowsStringsFromPdf("pdfs/trains/vozen red 14-15.pdf");
 
-		//PrivateBusScheduler scheduler = new PrivateBusScheduler(
-		//		"pdfs/trains/vozen red 14-15.pdf", 2, 13, 11);
-		//scheduler.getAll();
-	
-		 /* String[] list =
-		  PdfReader.getRowsStringsFromPdf("pdfs/private bus skopje/22.pdf");
-		  int i=0; for (String string : list) {
-		  System.out.println(i+".\t"+string); i++; }
-		 */
+		PrivateBusScheduler scheduler = new PrivateBusScheduler();
+		printCityBusList(scheduler.parseAllBusses());
+		
+
+		
+	/*	String[] list = PdfReader
+				.getRowsStringsFromPdf("pdfs/private bus skopje/9-everyDay.pdf");
+		int i = 0;
+		for (String string : list) {
+			System.out.print(i + ".\t" + string);
+			i++;
+		}*/
 
 	}
 

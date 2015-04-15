@@ -12,19 +12,11 @@ public class TrainScheduler {
 
 	private static String path = "train schedule.txt";
 
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
-	}
-
 	public static ArrayList<Train> parseAllTrainPdfs() {
 		ArrayList<String> list = null;
 		ArrayList<Train> result = new ArrayList<Train>();
 		try {
-			list = readFromDirectoriesNames();
+			list = readFromDirectoriesNames(path);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -50,7 +42,7 @@ public class TrainScheduler {
 		return schedule.getAll();
 	}
 
-	private static ArrayList<String> readFromDirectoriesNames()
+	public static ArrayList<String> readFromDirectoriesNames(String path)
 			throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(path));
 
