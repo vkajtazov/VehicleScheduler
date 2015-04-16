@@ -1,1 +1,10 @@
 pdfs/private bus skopje/9.EveryDay.pdf
+pdfs/private bus skopje/9.Saturday.pdf
+pdfs/private bus skopje/9.Sunday.pdf
+pdfs/private bus skopje/19.EveryDay.pdf
+pdfs/private bus skopje/19.Saturday.pdf
+pdfs/private bus skopje/19.Sunday.pdf
+pdfs/private bus skopje/20.EveryDay.pdf
+pdfs/private bus skopje/22.EveryDay.pdf
+pdfs/private bus skopje/22.Saturday.pdf
+pdfs/private bus skopje/22.Sunday.pdf

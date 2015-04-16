@@ -24,8 +24,9 @@ public class PrivateBusParser implements BasicCrawlerInterface<CityBus> {
 	public PrivateBusParser(String pathToFile) {
 		this.pathToFile = pathToFile;
 		rowsArray = PdfReader.getRowsStringsFromPdf(pathToFile);
-		regularity = PrivateBusScheduler.getRegularity(pathToFile.split("\\.")[1]);
-		lineNumber = rowsArray[1].split("\\.")[1].trim();
+		regularity = PrivateBusScheduler
+				.getRegularity(pathToFile.split("\\.")[1]);
+		lineNumber = parseLineNumber(rowsArray[1]);
 		setStartingEndingRows();
 	}
 
@@ -45,30 +46,41 @@ public class PrivateBusParser implements BasicCrawlerInterface<CityBus> {
 	}
 
 	public static boolean isWhiteSpaces(String str) {
-		 int strLen;
-		    if (str == null || (strLen = str.length()) == 0) {
-		        return true;
-		    }
-		    for (int i = 0; i < strLen; i++) {
-		        if ((Character.isWhitespace(str.charAt(i)) == false)) {
-		            return false;
-		        }
-		    }
-		    return true;
+		int strLen;
+		if (str == null || (strLen = str.length()) == 0) {
+			return true;
+		}
+		for (int i = 0; i < strLen; i++) {
+			if ((Character.isWhitespace(str.charAt(i)) == false)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private String parseLineNumber(String lineString) {
+		return lineString.replaceAll("[^0-9]", "");
 	}
 
 	private void setStartingEndingRows() {
 		oneWaystartRow = 2;
-		firstStation = rowsArray[3].split("\\s")[1];
-		for (int i = 2; i < rowsArray.length - 1; i++) {
 
-			if (isWhiteSpaces(rowsArray[i])) {
+		firstStation = rowsArray[2].split("\\s{3,}")[0];
+		for (int i = 2; i < rowsArray.length - 1; i++) {
+			if (isWhiteSpaces(rowsArray[i]))
+				continue;
+			if (isWord(rowsArray[i].split("\\s{3,}")[0])) {
 				oneWayendRow = i - 1;
-				backWaystartRow = i + 1;
-				secoundStation = rowsArray[i + 1].split("\\s")[1];
+				backWaystartRow = i;
+				secoundStation = rowsArray[i].split("\\s{3,}")[0];
 			}
 		}
 		backWayendRow = rowsArray.length - 1;
+
+	}
+
+	private boolean isWord(String str) {
+		return str.matches("[a-zA-Z]{0,}[^A-Za-z0-9]{0,}\\.{0,}[a-zA-Z]{0,}");
 
 	}
 
@@ -76,13 +88,38 @@ public class PrivateBusParser implements BasicCrawlerInterface<CityBus> {
 		ArrayList<String> result = new ArrayList<String>();
 
 		for (int i = start; i < end; i++) {
-			String[] tokens = rowsArray[i].trim().split("\\s");
-			for (String string : tokens) {
-				result.add(string);
+			String[] tokens = rowsArray[i].trim().split("\\s{3,}");
+			String temp;
+
+			for (int j = 0; j < tokens.length; j++) {
+				if (isWord(tokens[j]))
+					continue;
+				temp = removeDuplicateSeparators(',', tokens[j]);
+				temp = removeDuplicateSeparators('.', temp);
+				result.add(temp);
+
 			}
 		}
 
 		return result;
+	}
+
+	private String standardizeTime(String time) {
+		return time.replace("o", "0");
+	}
+
+	public static String removeDuplicateSeparators(char separator, String str) {
+
+		char[] charArray = str.toCharArray();
+		for (int i = 0; i < charArray.length; i++) {
+			if (charArray[i] == separator) {
+				for (int j = i + 1; j < charArray.length; j++) {
+					if (charArray[j] == separator)
+						charArray[i] = ' ';
+				}
+			}
+		}
+		return String.copyValueOf(charArray);
 	}
 
 	private Time getTime(String stringTime) {
@@ -94,16 +131,16 @@ public class PrivateBusParser implements BasicCrawlerInterface<CityBus> {
 		String hour = null;
 		String minutes = null;
 		if (time.length == 2) {
-			hour = time[0].trim();
-			minutes = time[1].trim();
+			hour = standardizeTime(time[0].trim());
+			minutes = standardizeTime(time[1].trim());
 		} else {
-			hour = stringTime;
+			hour = standardizeTime(stringTime);
 			minutes = "0";
 
 		}
-		if (Integer.parseInt(hour) > 24) {
-			System.out.println(stringTime);
-			int h = Integer.parseInt(hour);
+
+		int h = Integer.parseInt(hour);
+		if (h > 24) {
 			hour = String.valueOf(h - 100);
 		}
 
@@ -119,6 +156,8 @@ public class PrivateBusParser implements BasicCrawlerInterface<CityBus> {
 		ArrayList<CityBus> cityBusList = new ArrayList<CityBus>();
 
 		for (int i = 1; i < schedules.size(); i++) {
+			if (schedules.get(i).length() == 0)
+				continue;
 			CityBus newBus = new CityBus();
 			newBus.setStartingStation(first);
 			newBus.setArrivingStation(secound);
@@ -127,6 +166,7 @@ public class PrivateBusParser implements BasicCrawlerInterface<CityBus> {
 			newBus.setStartTime(getTime(schedules.get(i)));
 			newBus.setType(CityBus.TYPE.Private);
 			cityBusList.add(newBus);
+
 		}
 
 		return cityBusList;

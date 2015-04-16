@@ -74,6 +74,8 @@ public class CityBus implements VehicleI {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Line Number: " + lineNumber + "\n");
 		builder.append("Type: " + type + "\n");
+		builder.append("Starting station: " + startingStation + "\n");
+		builder.append("Arriving station: " + arrivingStation + "\n");
 		builder.append("Start time: " + startTime + "\n");
 		builder.append("Regularity: " + regularity + "\n");
 

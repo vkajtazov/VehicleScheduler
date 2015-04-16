@@ -87,17 +87,19 @@ public class Test {
 		// PdfReader.getRowsStringsFromPdf("pdfs/trains/vozen red 14-15.pdf");
 
 		PrivateBusScheduler scheduler = new PrivateBusScheduler();
+	//	scheduler.parseAllBusses();
 		printCityBusList(scheduler.parseAllBusses());
 		
 
 		
 	/*	String[] list = PdfReader
-				.getRowsStringsFromPdf("pdfs/private bus skopje/9-everyDay.pdf");
+				.getRowsStringsFromPdf("pdfs/private bus skopje/9.Sunday.pdf");
 		int i = 0;
 		for (String string : list) {
 			System.out.print(i + ".\t" + string);
 			i++;
 		}*/
+		
 
 	}
 
