@@ -8,3 +8,6 @@ pdfs/private bus skopje/20.EveryDay.pdf
 pdfs/private bus skopje/22.EveryDay.pdf
 pdfs/private bus skopje/22.Saturday.pdf
 pdfs/private bus skopje/22.Sunday.pdf
+pdfs/private bus skopje/23.EveryDay.pdf
+pdfs/private bus skopje/23.Saturday.pdf
+pdfs/private bus skopje/23.Sunday.pdf
