@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import crawler.implementation.BtBusStationCrawler;
+import crawler.implementation.JSPBusCrawler;
 import locationReaders.LocationReader;
 import models.CityBus;
 import models.IntercityBus;
@@ -86,9 +87,11 @@ public class Test {
 		// String[] list =
 		// PdfReader.getRowsStringsFromPdf("pdfs/trains/vozen red 14-15.pdf");
 
+		/*
 		PrivateBusScheduler scheduler = new PrivateBusScheduler();
-	//	scheduler.parseAllBusses();
-		printCityBusList(scheduler.parseAllBusses());
+		printCityBusList(scheduler.parseAllBusses());*/
+		
+		JSPBusCrawler.getAllLineHtmls();
 		
 
 		

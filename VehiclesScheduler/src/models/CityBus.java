@@ -20,6 +20,7 @@ public class CityBus implements VehicleI {
 	private String startingStation;
 	private String arrivingStation;
 	private REGULARITY regularity;
+	private String passingStreets;
 
 	public String getStartingStation() {
 		return startingStation;
