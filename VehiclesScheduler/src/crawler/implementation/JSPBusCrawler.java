@@ -5,12 +5,16 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.CityBus;
+
 import com.gargoylesoftware.htmlunit.AjaxController;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 public class JSPBusCrawler {
@@ -62,18 +66,33 @@ public class JSPBusCrawler {
 		return inputElements;
 	}
 
-	public static void getAllLineHtmls() throws IOException {
-		List<HtmlElement> elements = getAllLines();
-		List<HtmlPage> returnList = new ArrayList<HtmlPage>();
-	/*	
+	private static List<HtmlPage> getAllHtmlPages(List<HtmlElement> elements)
+			throws IOException {
 		for (HtmlElement htmlElement : elements) {
 			HtmlPage page = htmlElement.click();
+
+			HtmlInput element = page
+					.getFirstByXPath("//input[@src='images/ico_calendar.gif']");
+
+			page = (HtmlPage) element.click();
+
+			page = (HtmlPage) element.setValueAttribute("29.04.2015");
+			System.out.println(page.asText());
+			// System.out.println(p.asXml());
+		}
+		return null;
+	}
+
+	public static List<CityBus> getAllBusLines() throws IOException {
+		List<HtmlElement> elements = getAllLines();
+		List<HtmlPage> returnList = new ArrayList<HtmlPage>();
+
+		for (int i=0;i<10;i++) {
+			HtmlPage page = elements.get(i).click();
 			returnList.add(page);
-		}*/
-		
-		returnList.add((HtmlPage) elements.get(0).click());
-		
-		JSPBusParser.parseCityBuses(returnList);
+		}
+
+		return JSPBusParser.parseCityBuses(returnList);
 
 	}
 

@@ -1,23 +1,18 @@
 package test;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
-import crawler.implementation.BtBusStationCrawler;
 import crawler.implementation.JSPBusCrawler;
-import locationReaders.LocationReader;
+import crawler.implementation.JSPBusParser;
 import models.CityBus;
 import models.IntercityBus;
 import models.Taxi;
 import models.Train;
-import pdfReaders.PdfReader;
-import pdfReaders.PrivateBusParser;
-import pdfReaders.PrivateBusScheduler;
-import pdfReaders.TrainScheduler;
 
 public class Test {
 
@@ -68,6 +63,7 @@ public class Test {
 			writer.print(bus.toString());
 			writer.println("------------------------------------------");
 		}
+		writer.flush();
 		writer.close();
 	}
 	
@@ -91,10 +87,7 @@ public class Test {
 		PrivateBusScheduler scheduler = new PrivateBusScheduler();
 		printCityBusList(scheduler.parseAllBusses());*/
 		
-		JSPBusCrawler.getAllLineHtmls();
-		
-
-		
+		printCityBusList(JSPBusCrawler.getAllBusLines());
 	/*	String[] list = PdfReader
 				.getRowsStringsFromPdf("pdfs/private bus skopje/9.Sunday.pdf");
 		int i = 0;
@@ -102,7 +95,6 @@ public class Test {
 			System.out.print(i + ".\t" + string);
 			i++;
 		}*/
-		
 
 	}
 

@@ -21,6 +21,23 @@ public class CityBus implements VehicleI {
 	private String arrivingStation;
 	private REGULARITY regularity;
 	private String passingStreets;
+	private String busNote;
+
+	public String getPassingStreets() {
+		return passingStreets;
+	}
+
+	public void setPassingStreets(String passingStreets) {
+		this.passingStreets = passingStreets;
+	}
+
+	public String getBusNote() {
+		return busNote;
+	}
+
+	public void setBusNote(String busNote) {
+		this.busNote = busNote;
+	}
 
 	public String getStartingStation() {
 		return startingStation;
