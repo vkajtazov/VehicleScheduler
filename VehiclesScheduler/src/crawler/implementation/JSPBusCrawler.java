@@ -87,7 +87,7 @@ public class JSPBusCrawler {
 		List<HtmlElement> elements = getAllLines();
 		List<HtmlPage> returnList = new ArrayList<HtmlPage>();
 
-		for (int i=0;i<10;i++) {
+		for (int i=40;i<41;i++) {
 			HtmlPage page = elements.get(i).click();
 			returnList.add(page);
 		}

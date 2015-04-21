@@ -88,6 +88,7 @@ public class Test {
 		printCityBusList(scheduler.parseAllBusses());*/
 		
 		printCityBusList(JSPBusCrawler.getAllBusLines());
+		
 	/*	String[] list = PdfReader
 				.getRowsStringsFromPdf("pdfs/private bus skopje/9.Sunday.pdf");
 		int i = 0;
