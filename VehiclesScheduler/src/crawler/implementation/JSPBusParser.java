@@ -34,7 +34,6 @@ public class JSPBusParser {
 	private static List<CityBus> parseCityBusSchedule(HtmlPage page,
 			String lineNumber) {
 		List<CityBus> cityBusList = new ArrayList<CityBus>();
-		System.out.println(lineNumber);
 		HtmlElement elem = page
 				.getFirstByXPath("//table[@width='480'][@cellpadding='2']");
 		List<HtmlElement> rows = (List<HtmlElement>) elem
@@ -48,8 +47,12 @@ public class JSPBusParser {
 		for (int i = 3; i < rows.size() - 1; i++) {
 			td1 = rows.get(i).getFirstByXPath("td[2]");
 			td2 = rows.get(i).getFirstByXPath("td[3]");
-			cityBusList.addAll(parseCityBusRow(td1.asText(), td2.asText(),
-					startingStation, arrivingStation, lineNumber));
+			if (td1 != null && td2 != null) {
+				List<CityBus> rowCityBuses = parseCityBusRow(td1.asText(),
+						td2.asText(), startingStation, arrivingStation,
+						lineNumber);
+				cityBusList.addAll(rowCityBuses);
+			}
 		}
 		return cityBusList;
 
@@ -80,6 +83,7 @@ public class JSPBusParser {
 			bus.setLineNumber(lineNumber);
 			cityBuses.add(bus);
 		}
+
 		return cityBuses;
 
 	}
@@ -94,29 +98,51 @@ public class JSPBusParser {
 
 	}
 
+	private static boolean isThereNoNumbers(String str) {
+		char[] strArray = str.toCharArray();
+		for (char c : strArray) {
+			if (Character.isDigit(c))
+				return false;
+		}
+		return true;
+	}
+
 	private static List<Time> splitTimings(String timing) {
 		timing = removeAlphas(timing);
 		String[] timeArray = timing.split("/");
 		List<Time> returnTimings = new ArrayList<Time>();
 		for (int i = 0; i < timeArray.length; i++) {
-			if (!PrivateBusParser.isWhiteSpaces(timeArray[i])|| !timeArray[i].isEmpty()) {
-				System.out.println("da"+timeArray[i]+"da"+timeArray[i].isEmpty());
+			if (!PrivateBusParser.isWhiteSpaces(timeArray[i])
+					|| !timeArray[i].isEmpty()) {
+
 				String[] splitArray = timeArray[i].split(":");
 				String time = null;
 				if (splitArray.length == 1) {
+					if (timeArray[i].length() == 4) {
+						String hour = timeArray[i].substring(0, 2);
+						String minutes = timeArray[i].substring(2, 4);
+						time = standardizeTime(hour) + ":"
+								+ standardizeTime(minutes) + ":00";
 
-					time = standardizeTime(timeArray[i]) + ":"
-							+ standardizeTime(timeArray[i + 1]) + ":00";
-					i++;
+					} else {
+						time = standardizeTime(timeArray[i]) + ":"
+								+ standardizeTime(timeArray[i + 1]) + ":00";
+						i++;
+					}
 				} else if (splitArray.length == 2) {
-
-					time = standardizeTime(timeArray[i]) + ":00";
+					time = standardizeTime(splitArray[0] + ":" + splitArray[1])
+							+ ":00";
 				} else if (splitArray.length == 3) {
-					time = standardizeTime(splitArray[0] + ":" + splitArray[1]
-							+ ":00");
-					String time2 = standardizeTime(splitArray[2] + ":"
-							+ timeArray[3] + ":00");
-					i++;
+					if (isThereNoNumbers(splitArray[0])) {
+						time = standardizeTime(splitArray[1] + ":"
+								+ splitArray[2] + ":00");
+					} else {
+						time = standardizeTime(splitArray[0] + ":"
+								+ splitArray[1] + ":00");
+						String time2 = standardizeTime(splitArray[2] + ":"
+								+ timeArray[3] + ":00");
+						i++;
+					}
 				} else if (splitArray.length == 4) {
 					time = standardizeTime(splitArray[0] + ":" + splitArray[1]
 							+ ":00");
@@ -125,7 +151,9 @@ public class JSPBusParser {
 					returnTimings.add(Time.valueOf(time2));
 
 				}
-				returnTimings.add(Time.valueOf(time));
+				if (time != null) {
+					returnTimings.add(Time.valueOf(time));
+				}
 			}
 		}
 
@@ -133,12 +161,12 @@ public class JSPBusParser {
 	}
 
 	private static String removeAlphas(String string) {
-		System.out.println(string);
 		char[] stringArray = string.toCharArray();
 		for (int i = 0; i < stringArray.length; i++) {
 			if (Character.isAlphabetic(stringArray[i]) || stringArray[i] == '.'
 					|| stringArray[i] == ',' || stringArray[i] == '('
-					|| stringArray[i] == ')') {
+					|| stringArray[i] == ')' || stringArray[i] == '„'
+					|| stringArray[i] == '“') {
 				stringArray[i] = ' ';
 			}
 		}
