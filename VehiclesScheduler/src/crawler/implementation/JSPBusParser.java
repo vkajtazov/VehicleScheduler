@@ -27,6 +27,7 @@ public class JSPBusParser {
 
 	private static String parseCityBusLineNumber(HtmlPage page) {
 		HtmlElement elem = page.getFirstByXPath("//table[@width='250']");
+		System.out.println(elem);
 		HtmlElement lineNumber = elem.getFirstByXPath("tbody//strong");
 		return lineNumber.asText();
 	}

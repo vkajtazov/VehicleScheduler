@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/busLines/BusLinesGetter.java=UTF-8
 encoding//src/crawler/implementation/BusStationCrawler.java=UTF-8
 encoding//src/test/Test.java=UTF-8
 encoding//src/traslateText/Translate.java=UTF-8

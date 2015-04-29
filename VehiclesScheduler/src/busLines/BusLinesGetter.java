@@ -2,6 +2,7 @@ package busLines;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Scanner;
 
 import org.json.JSONArray;
@@ -17,7 +18,7 @@ public class BusLinesGetter {
 	private static JSONObject getDestinationLocation(String start, String end)
 			throws IOException {
 		// build a URL
-		String urlRequest = baseUrl + start + dest + end + optional + key;
+		String urlRequest = baseUrl + URLEncoder.encode(start, "UTF-8") + dest + URLEncoder.encode(end, "UTF-8") + optional + key;
 		System.out.println(urlRequest);
 		URL url = new URL(urlRequest);
 
@@ -38,10 +39,12 @@ public class BusLinesGetter {
 
 	public static void firstMethod() throws IOException {
 
-		JSONObject obj = getDestinationLocation("42.0154503,21.4360737",
-				"42.0130478,21.4364411");
+		JSONObject obj = getDestinationLocation("A8, Bulevar Partizanski Odredi, Skopje",
+				"Drama Theater, Bulevar Partizanski Odredi, Skopje");
 		JSONArray arj = obj.getJSONArray("routes");
 		arj = arj.getJSONObject(0).getJSONArray("legs");
+		arj = arj.getJSONObject(0).getJSONArray("steps");
+		arj = arj.getJSONObject(0).getJSONArray("steps");
 		System.out.println(arj.length());
 		for (int i = 0; i < arj.length(); i++) {
 			System.out.println(arj.get(i).toString());
