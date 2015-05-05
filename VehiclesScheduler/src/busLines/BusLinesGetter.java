@@ -18,7 +18,7 @@ public class BusLinesGetter {
 	private static JSONObject getDestinationLocation(String start, String end)
 			throws IOException {
 		// build a URL
-		String urlRequest = baseUrl + URLEncoder.encode(start, "UTF-8") + dest + URLEncoder.encode(end, "UTF-8") + optional + key;
+		String urlRequest = baseUrl + start + dest + end + optional + key;
 		System.out.println(urlRequest);
 		URL url = new URL(urlRequest);
 
@@ -33,19 +33,15 @@ public class BusLinesGetter {
 		JSONObject obj = new JSONObject(str);
 		if (!obj.getString("status").equals("OK"))
 			return null;
-
 		return obj;
 	}
 
-	public static void firstMethod() throws IOException {
+	public static void firstMethod(String start, String end) throws IOException {
 
-		JSONObject obj = getDestinationLocation("A8, Bulevar Partizanski Odredi, Skopje",
-				"Drama Theater, Bulevar Partizanski Odredi, Skopje");
+		JSONObject obj = getDestinationLocation(start, end);
 		JSONArray arj = obj.getJSONArray("routes");
 		arj = arj.getJSONObject(0).getJSONArray("legs");
 		arj = arj.getJSONObject(0).getJSONArray("steps");
-		arj = arj.getJSONObject(0).getJSONArray("steps");
-		System.out.println(arj.length());
 		for (int i = 0; i < arj.length(); i++) {
 			System.out.println(arj.get(i).toString());
 
