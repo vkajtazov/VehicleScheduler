@@ -23,6 +23,7 @@ public class BusStopsLocationGetter {
 		URL url = new URL(urlRequest);
 
 		// read from the URL
+
 		Scanner scan = new Scanner(url.openStream());
 		String str = new String();
 		while (scan.hasNext())
@@ -40,7 +41,7 @@ public class BusStopsLocationGetter {
 		// Skopje center location
 		String location = "41.996922,21.427637";
 		// 15 km radius
-		String radius = "10000";
+		String radius = "15000";
 		JSONObject obj = getJsonObj(location, radius);
 		JSONArray arr = obj.getJSONArray("results");
 		ArrayList<Station> stationList = new ArrayList<Station>();

@@ -10,7 +10,7 @@ public class Line {
 
 	private Time traveledTime;
 
-	private float kmTraveled;
+	private String kmTraveled;
 
 	public Station getStartingStation() {
 		return startingStation;
@@ -36,12 +36,19 @@ public class Line {
 		this.traveledTime = traveledTime;
 	}
 
-	public float getKmTraveled() {
+	public String getKmTraveled() {
 		return kmTraveled;
 	}
 
-	public void setKmTraveled(float kmTraveled) {
+	public void setKmTraveled(String kmTraveled) {
 		this.kmTraveled = kmTraveled;
+	}
+
+	@Override
+	public String toString() {
+		return "Line [startingStation=" + startingStation
+				+ ", arrivingStation=" + arrivingStation + ", traveledTime="
+				+ traveledTime + ", kmTraveled=" + kmTraveled + "]";
 	}
 
 }
