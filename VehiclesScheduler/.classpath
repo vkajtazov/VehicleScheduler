@@ -26,7 +26,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.21.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xercesImpl-2.11.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xml-apis-1.4.01.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/json.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/json.jar" sourcepath="C:/Users/PolarCape/.m2/repository/org/json/json/20141113/json-20141113-sources.jar"/>
 	<classpathentry kind="lib" path="libs/jackson-all-1.9.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

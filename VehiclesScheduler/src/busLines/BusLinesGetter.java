@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import models.Line;
+import models.SubLine;
 import models.Station;
 
 import org.apache.commons.codec.binary.Base64;
@@ -24,7 +24,7 @@ public class BusLinesGetter {
 
 	private static JSONObject getDestinationLocation(String start, String end)
 			throws IOException {
-		
+
 		String name = "api.liniskiprevoz";
 		String password = "asdh^$jhgFD334d$%";
 
@@ -33,13 +33,14 @@ public class BusLinesGetter {
 		byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
 		String authStringEnc = new String(authEncBytes);
 		System.out.println("Base64 encoded auth string: " + authStringEnc);
-		
+
 		// build a URL
 		String urlRequest = baseUrl + start + dest + end + optional + key;
 		System.out.println(urlRequest);
 		URL url = new URL(urlRequest);
 		URLConnection urlConnection = url.openConnection();
-		urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
+		urlConnection.setRequestProperty("Authorization", "Basic "
+				+ authStringEnc);
 
 		// read from the URL
 		Scanner scan = new Scanner(url.openStream());
@@ -55,14 +56,14 @@ public class BusLinesGetter {
 		return obj;
 	}
 
-	public static List<Line> parseRoutes(String start, String end)
+	public static List<SubLine> parseRoutes(String start, String end)
 			throws IOException {
-		List<Line> listStation = new ArrayList<Line>();
+		List<SubLine> listStation = new ArrayList<SubLine>();
 		JSONObject obj = getDestinationLocation(start, end);
 		if (obj == null)
 			return listStation;
 		JSONArray arj = obj.getJSONArray("routes");
-		Line line = null;
+		SubLine line = null;
 		for (int i = 0; i < arj.length(); i++) {
 			line = parseRoute(arj.getJSONObject(i));
 			if (line != null) {
@@ -72,7 +73,7 @@ public class BusLinesGetter {
 		return listStation;
 	}
 
-	public static Line parseRoute(JSONObject jsonObj) {
+	public static SubLine parseRoute(JSONObject jsonObj) {
 		JSONArray arr = jsonObj.getJSONArray("legs");
 		JSONObject tempJson;
 		arr = arr.getJSONObject(0).getJSONArray("steps");
@@ -95,8 +96,8 @@ public class BusLinesGetter {
 		return null;
 	}
 
-	public static Line parseTransitInfo(JSONObject jsonObj) {
-		Line line = new Line();
+	public static SubLine parseTransitInfo(JSONObject jsonObj) {
+		SubLine line = new SubLine();
 		String distance = jsonObj.getJSONObject("distance").get("text")
 				.toString();
 		String time = jsonObj.getJSONObject("duration").get("text").toString();
@@ -116,6 +117,8 @@ public class BusLinesGetter {
 		String departurelng = jsonObj.getJSONObject("transit_details")
 				.getJSONObject("departure_stop").getJSONObject("location")
 				.get("lng").toString();
+		String linePassing = jsonObj.getJSONObject("transit_details")
+				.getJSONObject("line").get("short_name").toString();
 
 		Station start = new Station();
 		start.setStationLatitude(Double.valueOf(departurelat));
@@ -130,6 +133,7 @@ public class BusLinesGetter {
 		line.setArrivingStation(end);
 		line.setStartingStation(start);
 		line.setKmTraveled(distance);
+		line.setLinePassing(linePassing);
 		String minutes = time.split(" ")[0];
 		Time traveledTime = Time.valueOf("00:" + minutes + ":00");
 		line.setTraveledTime(traveledTime);
