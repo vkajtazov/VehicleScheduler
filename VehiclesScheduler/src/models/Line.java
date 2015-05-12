@@ -15,10 +15,19 @@ public class Line {
 	private String distance;
 	private Station startStation;
 	private Station arrivingStation;
+	private String regularity;
 	private List<SubLine> sublineList;
 
 	public Line() {
 		sublineList = new ArrayList<SubLine>();
+	}
+
+	public String getRegularity() {
+		return regularity;
+	}
+
+	public void setRegularity(String regularity) {
+		this.regularity = regularity;
 	}
 
 	public Station getStartStation() {
@@ -113,8 +122,8 @@ public class Line {
 				+ ", backWayStartTime=" + backWayStartTime
 				+ ", backWayArriveTime=" + backWayArriveTime + ", distance="
 				+ distance + ", startStation=" + startStation
-				+ ", arrivingStation=" + arrivingStation + ", sublineList="
-				+ sublineList + "]";
+				+ ", arrivingStation=" + arrivingStation + ", regularity="
+				+ regularity + ", sublineList=" + sublineList + "]";
 	}
 
 }

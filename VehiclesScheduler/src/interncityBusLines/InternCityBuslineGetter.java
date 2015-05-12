@@ -7,6 +7,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Time;
+import java.util.ArrayList;
+import java.util.List;
 
 import models.Line;
 import models.Station;
@@ -60,9 +62,12 @@ public class InternCityBuslineGetter {
 
 	public static void get() {
 		JSONArray arr = getSchedule();
-		Line line = new Line();
-		setLineInfo(line, arr.getJSONObject(0));
-		System.out.println(line.toString());
+		ArrayList<Line> lineList = new ArrayList<Line>();
+		for (int i = 0; i < arr.length(); i++) {
+			Line line = new Line();
+			setLineInfo(line, arr.getJSONObject(0));
+			lineList.add(line);
+		}
 	}
 
 	private static void setLineInfo(Line line, JSONObject obj) {
@@ -73,6 +78,7 @@ public class InternCityBuslineGetter {
 		line.setTransporter(transporter);
 		line.setDistance(distance);
 		setSubLines(line, obj);
+		setRegularity(line, obj);
 	}
 
 	private static void setSubLines(Line line, JSONObject obj) {
@@ -139,6 +145,51 @@ public class InternCityBuslineGetter {
 		minutes = minutes % 60;
 		return Time.valueOf(hour + ":" + minutes + ":00");
 
+	}
+
+	private static void setRegularity(Line line, JSONObject obj) {
+		String monday = obj.getJSONObject("DefinicijaNaPoagjanja")
+				.getJSONObject("PoaganjeDef").getJSONObject("Rezim")
+				.get("@Ponedelnik").toString();
+		String tuesday = obj.getJSONObject("DefinicijaNaPoagjanja")
+				.getJSONObject("PoaganjeDef").getJSONObject("Rezim")
+				.get("@Vtornik").toString();
+		String wednesday = obj.getJSONObject("DefinicijaNaPoagjanja")
+				.getJSONObject("PoaganjeDef").getJSONObject("Rezim")
+				.get("@Sreda").toString();
+		String thursday = obj.getJSONObject("DefinicijaNaPoagjanja")
+				.getJSONObject("PoaganjeDef").getJSONObject("Rezim")
+				.get("@Cetvrtok").toString();
+		String friday = obj.getJSONObject("DefinicijaNaPoagjanja")
+				.getJSONObject("PoaganjeDef").getJSONObject("Rezim")
+				.get("@Petok").toString();
+		String saturday = obj.getJSONObject("DefinicijaNaPoagjanja")
+				.getJSONObject("PoaganjeDef").getJSONObject("Rezim")
+				.get("@Sabota").toString();
+		String sunday = obj.getJSONObject("DefinicijaNaPoagjanja")
+				.getJSONObject("PoaganjeDef").getJSONObject("Rezim")
+				.get("@Nedela").toString();
+		String praznici = obj.getJSONObject("DefinicijaNaPoagjanja")
+				.getJSONObject("PoaganjeDef").getJSONObject("Rezim")
+				.get("@DrzavniPraznici").toString();
+		String regularity = "";
+		if (monday.equals("1"))
+			regularity += ";Monday";
+		if (tuesday.equals("1"))
+			regularity += ";Tuesday";
+		if (wednesday.equals("1"))
+			regularity += ";Wednesday";
+		if (thursday.equals("1"))
+			regularity += ";Thursday";
+		if (friday.equals("1"))
+			regularity += ";Friday";
+		if (saturday.equals("1"))
+			regularity += ";Saturday";
+		if (sunday.equals("1"))
+			regularity += ";Sunday";
+		if (praznici.equals("1"))
+			regularity += ";Holidays";
+		line.setRegularity(regularity);
 	}
 
 	private static int parseTraveledMinutesFromString(String parseTime) {
